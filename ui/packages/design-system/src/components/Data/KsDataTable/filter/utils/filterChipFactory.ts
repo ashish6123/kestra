@@ -146,6 +146,21 @@ export const resolveDefaultVisibleValue = (key: FilterKeyConfig): AppliedFilter[
     return key.valueType === "multi-select" ? [] : ""
 }
 
+const sameFilterValue = (a: AppliedFilter["value"], b: AppliedFilter["value"]): boolean =>
+    Array.isArray(a) && Array.isArray(b) ? a.length === b.length && a.every((v, i) => v === b[i]) : a === b
+
+export const isFilterAtDefault = (
+    filter: AppliedFilter,
+    key: FilterKeyConfig | undefined,
+    defaultValue: AppliedFilter["value"],
+): boolean => {
+    if (!key || filter.comparator !== key.comparators[0]) return false
+    const dateFilter = filter.meta?.dateFilter
+    if (dateFilter && dateFilter !== key.dateFilterOptions?.[0]?.value) return false
+    return sameFilterValue(filter.value, defaultValue)
+        || (key.clearedValue !== undefined && filter.value === key.clearedValue)
+}
+
 export const defaultVisibleValueLabel = (value: AppliedFilter["value"]): string => {
     if (Array.isArray(value)) return value.join(", ")
     if (value && typeof value === "object" && "startDate" in value && "endDate" in value) {

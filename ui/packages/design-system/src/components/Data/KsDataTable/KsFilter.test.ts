@@ -3,6 +3,7 @@ import {flushPromises} from "@vue/test-utils"
 import {defineComponent, h, inject} from "vue"
 import {createRouter, createMemoryHistory} from "vue-router"
 import KsFilter from "./KsFilter.vue"
+import ksFilterLocale from "./KsFilter.locale"
 import FilterEditPopper from "./filter/layout/FilterEditPopper.vue"
 import FilterFooter from "./filter/layout/FilterFooter.vue"
 import {FILTER_CONTEXT_INJECTION_KEY} from "./filter/utils/filterInjectionKeys"
@@ -243,5 +244,89 @@ describe("KsFilter reset to default", () => {
         await flushPromises()
 
         expect(lastAppliedValue(wrapper)).toBe("PT720H")
+    })
+})
+
+describe("KsFilter reset filters button", () => {
+    const stateKey: FilterKeyConfig = {
+        key: "state",
+        label: "State",
+        valueType: "multi-select",
+        visibleByDefault: true,
+        comparators: [Comparators.IN],
+    }
+
+    const timeRangeKey: FilterKeyConfig = {
+        key: "timeRange",
+        label: "Interval",
+        valueType: "select",
+        comparators: [Comparators.EQUALS],
+        valueProvider: async () => [{label: "Last 24 hours", value: "PT24H"}],
+    }
+
+    const mountFilter = async (query: Record<string, string> = {}) => {
+        const testRouter = createRouter({
+            history: createMemoryHistory(),
+            routes: [{path: "/", component: {template: "<div/>"}}],
+        })
+        await testRouter.push({path: "/", query})
+        await testRouter.isReady()
+
+        let context: FilterContext | undefined
+        const Harness = defineComponent({
+            setup() {
+                context = inject(FILTER_CONTEXT_INJECTION_KEY)
+                return () => h("div")
+            },
+        })
+
+        const wrapper = i18nMount(KsFilter, {
+            props: {configuration: {title: "", keys: [stateKey, timeRangeKey]}, prefix: "test"},
+            slots: {extra: () => h(Harness)},
+            locales: ksFilterLocale,
+            global: {plugins: [testRouter]},
+        })
+        await flushPromises()
+        return {wrapper, context: context as FilterContext, filterRouter: testRouter}
+    }
+
+    const resetButton = (wrapper: Awaited<ReturnType<typeof mountFilter>>["wrapper"]) =>
+        wrapper.find(".refresh-btn")
+
+    beforeEach(() => localStorage.clear())
+
+    test("is labelled as a reset and disabled while the filters are the defaults", async () => {
+        const {wrapper} = await mountFilter()
+
+        expect(resetButton(wrapper).text()).toBe("Reset filters")
+        expect(resetButton(wrapper).attributes("disabled")).toBeDefined()
+    })
+
+    test("is enabled once a filter differs from its default", async () => {
+        const {wrapper, filterRouter} = await mountFilter()
+
+        await filterRouter.push({path: "/", query: {"filters[timeRange][EQUALS]": "PT168H"}})
+        await flushPromises()
+
+        expect(resetButton(wrapper).attributes("disabled")).toBeUndefined()
+    })
+
+    test("is enabled while a search term is typed", async () => {
+        const {wrapper, context} = await mountFilter()
+
+        context.searchQuery.value = "error"
+        await flushPromises()
+
+        expect(resetButton(wrapper).attributes("disabled")).toBeUndefined()
+    })
+
+    test("is disabled again once the default interval is back", async () => {
+        const {wrapper, filterRouter} = await mountFilter({"filters[timeRange][EQUALS]": "PT168H"})
+        expect(resetButton(wrapper).attributes("disabled")).toBeUndefined()
+
+        await filterRouter.push({path: "/", query: {"filters[timeRange][EQUALS]": "PT24H"}})
+        await flushPromises()
+
+        expect(resetButton(wrapper).attributes("disabled")).toBeDefined()
     })
 })

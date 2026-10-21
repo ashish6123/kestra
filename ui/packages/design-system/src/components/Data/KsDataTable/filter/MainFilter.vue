@@ -139,7 +139,7 @@
                 link
                 class="refresh-btn"
                 @click="handleReset"
-                :disabled="!canReset || filter.readOnly?.value"
+                :disabled="!filter.canReset?.value || filter.readOnly?.value"
             >
                 {{ $t("filter.reset") }}
             </KsButton>
@@ -243,14 +243,6 @@
             ? t("filter.rule_count", {count: ruleCount.value})
             : t("filter.rules_count", {count: ruleCount.value}),
     )
-
-    const canReset = computed(() => {
-        return (
-            !!filter.hasAppliedFilters?.value ||
-            !!filter.hasDismissedDefaultVisibleKeys?.value ||
-            !!filter.searchQuery?.value
-        )
-    })
 
     const handleAddFilter = (newFilter: AppliedFilter) => {
         filter.addFilter(newFilter)

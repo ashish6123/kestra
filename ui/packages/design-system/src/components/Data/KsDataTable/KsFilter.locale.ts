@@ -31,7 +31,7 @@ export default {
             "select filter": "Select a filter to add",
             "enter description": "Enter filter description",
             "enter name": "Enter filter name",
-            "reset": "Clear all",
+            "reset": "Reset filters",
             "reset_all": "Reset all filters",
             "reset_tooltip": "Reset to default",
             "or": "OR",

@@ -75,7 +75,7 @@
                             {{ $t("filter.add_condition_group") }}
                             <span v-if="rows.length" class="adv-add-op">{{ ctx.topLogical.value === "OR" ? $t("filter.or") : $t("filter.and") }}</span>
                         </KsButton>
-                        <button class="adv-clear" type="button" :disabled="ctx.readOnly.value" @click="ctx.clearFilters">
+                        <button class="adv-clear" type="button" :disabled="!ctx.canReset.value || ctx.readOnly.value" @click="ctx.clearFilters">
                             {{ $t("filter.reset") }}
                         </button>
                     </div>

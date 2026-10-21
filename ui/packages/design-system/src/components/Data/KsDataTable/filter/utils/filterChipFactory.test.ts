@@ -15,6 +15,7 @@ import {
     createTimeRangeFilter,
     defaultVisibleValueLabel,
     isDateRangeValue,
+    isFilterAtDefault,
     processFieldValue,
     resolveDefaultVisibleValue,
 } from "./filterChipFactory"
@@ -654,5 +655,55 @@ describe("isDateRangeValue", () => {
         ["an array", ["2026-01-01", "2026-01-02"]],
     ])("is false for %s", (_, value) => {
         expect(isDateRangeValue(value)).toBe(false)
+    })
+})
+
+describe("isFilterAtDefault", () => {
+    const intervalKey: FilterKeyConfig = {
+        key: "timeRange",
+        label: "Interval",
+        valueType: "select",
+        comparators: [Comparators.EQUALS],
+        clearedValue: "ALL",
+        dateFilterOptions: [
+            {value: "START_DATE", label: "Start date"},
+            {value: "END_DATE", label: "End date"},
+        ],
+    }
+    const interval = (over: Partial<AppliedFilter> = {}): AppliedFilter => ({
+        id: "i1",
+        key: "timeRange",
+        keyLabel: "Interval",
+        comparator: Comparators.EQUALS,
+        comparatorLabel: "Equals",
+        value: "PT24H",
+        valueLabel: "Last 24 hours",
+        ...over,
+    })
+
+    test("matches a value equal to the default", () => {
+        expect(isFilterAtDefault(interval(), intervalKey, "PT24H")).toBe(true)
+    })
+
+    test("rejects a value that differs from the default", () => {
+        expect(isFilterAtDefault(interval({value: "PT168H"}), intervalKey, "PT24H")).toBe(false)
+    })
+
+    test("treats the cleared value as a default", () => {
+        expect(isFilterAtDefault(interval({value: "ALL"}), intervalKey, "PT24H")).toBe(true)
+    })
+
+    test("compares array values element by element", () => {
+        const stateKey: FilterKeyConfig = {key: "state", label: "State", valueType: "multi-select", comparators: [Comparators.IN]}
+        const state = (value: string[]): AppliedFilter => interval({key: "state", comparator: Comparators.IN, value})
+
+        expect(isFilterAtDefault(state([]), stateKey, [])).toBe(true)
+        expect(isFilterAtDefault(state(["FAILED"]), stateKey, [])).toBe(false)
+    })
+
+    test("rejects another comparator, another date field or an unknown key", () => {
+        expect(isFilterAtDefault(interval({comparator: Comparators.NOT_EQUALS}), intervalKey, "PT24H")).toBe(false)
+        expect(isFilterAtDefault(interval({meta: {dateFilter: "END_DATE"}}), intervalKey, "PT24H")).toBe(false)
+        expect(isFilterAtDefault(interval(), undefined, "PT24H")).toBe(false)
     })
 })

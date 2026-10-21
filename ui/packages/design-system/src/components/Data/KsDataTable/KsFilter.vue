@@ -56,6 +56,7 @@
     import {useDataOptions} from "./filter/composables/useDataOptions"
     import {usePeriodicRefresh} from "./filter/composables/usePeriodicRefresh"
     import {FILTER_CONTEXT_INJECTION_KEY} from "./filter/utils/filterInjectionKeys.ts"
+    import {isFilterAtDefault} from "./filter/utils/filterChipFactory"
     import {SAVED_FILTER_ANALYTICS_INJECTION_KEY, type SavedFilterAction} from "./filter/utils/filterAnalytics"
     import MainFilter from "./filter/MainFilter.vue"
     import MobileFilter from "./filter/MobileFilter.vue"
@@ -193,6 +194,13 @@
 
     const hasFilterKeys = computed(() => props.configuration.keys?.length > 0)
     const hasAppliedFilters = computed(() => appliedFilters.value?.length > 0)
+    const canReset = computed(() =>
+        !!searchQuery.value
+        || appliedFilters.value.some(filter => {
+            const key = props.configuration.keys?.find(candidate => candidate.key === filter.key)
+            return !key || !isFilterAtDefault(filter, key, getDefaultValue(key))
+        }),
+    )
 
     const loadSavedFilter = (savedFilter: SavedFilter) => {
         reportSavedFilter("apply", savedFilter.filters.length)
@@ -225,6 +233,7 @@
         editingFilter,
         hasFilterKeys,
         hasAppliedFilters,
+        canReset,
         hasDismissedDefaultVisibleKeys,
         buttons: computed(() => props.buttons),
         readOnly: computed(() => props.readOnly),

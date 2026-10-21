@@ -10,6 +10,7 @@ export interface FilterContext {
     hasFilterKeys: ComputedRef<boolean>;
     showSearchInput: ComputedRef<boolean>;
     hasAppliedFilters: ComputedRef<boolean>;
+    canReset: ComputedRef<boolean>;
     hasDismissedDefaultVisibleKeys: ComputedRef<boolean>;
     tableOptions: ComputedRef<TableOptions>;
     savedFilters: ComputedRef<SavedFilter[]>;

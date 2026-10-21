@@ -57,6 +57,7 @@ const makeCtx = (over: Partial<FilterContext> = {}): FilterContext => ({
     deleteSavedFilter: vi.fn(),
     resetToDefaults: vi.fn(),
     getDefaultValue: vi.fn(() => ""),
+    canReset: computed(() => true),
     hasPreApplied: vi.fn(() => false),
     getPreApplied: vi.fn(() => undefined),
     updateSavedFilter: vi.fn(),
@@ -133,5 +134,11 @@ describe("MobileFilter", () => {
         await wrapper.find(".mobile-toggle").trigger("click")
         await wrapper.find(".sheet-clear").trigger("click")
         expect(ctx.clearFilters).toHaveBeenCalled()
+    })
+
+    test("disables clear all when there is nothing to reset", async () => {
+        const wrapper = mountWith(makeCtx({hasAppliedFilters: computed(() => true), canReset: computed(() => false)}))
+        await wrapper.find(".mobile-toggle").trigger("click")
+        expect(wrapper.find(".sheet-clear").attributes("disabled")).toBeDefined()
     })
 })

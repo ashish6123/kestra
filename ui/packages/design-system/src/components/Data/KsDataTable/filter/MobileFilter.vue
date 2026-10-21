@@ -115,7 +115,7 @@
                     <KsButton
                         link
                         class="sheet-clear"
-                        :disabled="!canReset || filter.readOnly?.value"
+                        :disabled="!filter.canReset?.value || filter.readOnly?.value"
                         @click="filter.clearFilters"
                     >
                         {{ $t("filter.reset") }}
@@ -197,12 +197,6 @@
 
     const activeCount = computed(
         () => (filter.appliedFilters?.value ?? []).filter((f) => hasValue(f.value)).length,
-    )
-
-    const canReset = computed(
-        () => !!filter.hasAppliedFilters?.value
-            || !!filter.hasDismissedDefaultVisibleKeys?.value
-            || !!filter.searchQuery?.value,
     )
 
     const collapseField = () => {
