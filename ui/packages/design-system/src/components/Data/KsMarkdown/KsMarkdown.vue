@@ -1,5 +1,5 @@
 <template>
-    <div ref="containerRef" class="ks-markdown">
+    <div ref="containerRef" class="ks-markdown" :class="{'ks-markdown--compact': compact}">
         <component :is="markdownContent" />
     </div>
 </template>
@@ -26,6 +26,8 @@
             content?: string,
             html?: boolean;
             xssProtection?: boolean;
+            /** Scales headings down to the UI type scale, for markdown rendered inside a panel rather than as a page. */
+            compact?: boolean;
             /** Map of tag name → Vue component. Supports lowercase HTML elements (e.g. "a")
              *  and PascalCase custom components (e.g. "ChildCard"). */
             components?: Record<string, Component>;
@@ -34,6 +36,7 @@
             content: undefined,
             html: true,
             xssProtection: true,
+            compact: false,
             components: () => ({}),
         },
     )
@@ -537,6 +540,17 @@
 
                 &:hover .ks-markdown__heading-link { opacity: 1; }
             }
+        }
+
+        &.ks-markdown--compact {
+            h1, h2, h3, h4, h5, h6 {
+                font-weight: var(--ks-font-weight-semibold);
+            }
+
+            h1 { font-size: var(--ks-font-size-xl); }
+            h2 { font-size: var(--ks-font-size-lg); }
+            h3 { font-size: var(--ks-font-size-md); }
+            h4, h5, h6 { font-size: var(--ks-font-size-base); }
         }
 
         p {

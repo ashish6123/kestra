@@ -30,6 +30,14 @@ describe("KsMarkdown", () => {
         expect(wrapper.find(".ks-markdown").exists()).toBe(true)
     })
 
+    test("adds the compact modifier only when the compact prop is set", () => {
+        const regular = mount(KsMarkdown, {props: {content: "# Title"}, global: globalConfig})
+        const compact = mount(KsMarkdown, {props: {content: "# Title", compact: true}, global: globalConfig})
+
+        expect(regular.find(".ks-markdown--compact").exists()).toBe(false)
+        expect(compact.find(".ks-markdown--compact").exists()).toBe(true)
+    })
+
     test("renders a paragraph", () => {
         const wrapper = mount(KsMarkdown, {
             props: {content: "Hello world"},
