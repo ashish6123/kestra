@@ -1,5 +1,7 @@
 import {ref, watch, type ComputedRef, type Ref} from "vue"
+import {useClient} from "@kestra-io/kestra-sdk"
 import * as OutputsAPI from "@kestra-io/kestra-sdk/outputs"
+import {apiUrl} from "override/utils/route"
 import {handledIf} from "../utils/kestraHttp"
 
 // Since Kestra 2.0, task run outputs are no longer embedded on the Execution
@@ -86,4 +88,14 @@ export async function loadExecutionOutputs(executionId: string): Promise<Record<
         if (handledIf(e, [404])) return {}
         throw e
     }
+}
+
+/**
+ * Calls a plugin endpoint (a PluginEndpoint `name`) for one task run. `cls` is any class of the plugin, usually the
+ * task type. Plugin UIs get this pre-bound as `fetchEndpoint`, so they never call the API themselves.
+ */
+export async function callTaskRunEndpoint(cls: string, name: string, executionId: string, taskRunId: string, params: Record<string, string> = {}): Promise<unknown> {
+    const url = `${apiUrl()}/plugins/${encodeURIComponent(cls)}/endpoints/${encodeURIComponent(name)}/${executionId}/${taskRunId}`
+    const response = await useClient().get(url, {params})
+    return response.data
 }

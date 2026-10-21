@@ -37,6 +37,13 @@ export const propsSchema = z.object({
         sort?: string
         taskRunId?: string
     }) => Promise<PagedResultsMetricEntry>>().optional(),
+    // Calls one of the plugin's own endpoints (a PluginEndpoint `name`) for this task's current task run,
+    // with the plugin, the execution and the task run already bound, so an artifact never calls the API
+    // itself. `params` go on the query string; pass `taskRunId` to target another iteration. Rejects
+    // outside an execution.
+    fetchEndpoint: z.custom<(name: string, params?: Record<string, string>, query?: {
+        taskRunId?: string
+    }) => Promise<unknown>>().optional(),
 })
 
 export default defineArtifactSlot(() => ({
