@@ -547,10 +547,9 @@
                 font-weight: var(--ks-font-weight-semibold);
             }
 
-            h1 { font-size: var(--ks-font-size-xl); }
-            h2 { font-size: var(--ks-font-size-lg); }
-            h3 { font-size: var(--ks-font-size-md); }
-            h4, h5, h6 { font-size: var(--ks-font-size-base); }
+            h1 { font-size: var(--ks-font-size-lg); }
+            h2 { font-size: var(--ks-font-size-base); }
+            h3, h4, h5, h6 { font-size: var(--ks-font-size-sm); }
         }
 
         p {
